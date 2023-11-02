@@ -1,0 +1,34 @@
+---
+title: 'Structure'
+description: 'A typical PromptSpec file includes the following sections.'
+---
+
+### Metadata
+
+Includes the version, name, and description of the prompt.
+```yaml
+version: 1.0
+name: Weather Bot
+description: Ask the AI what anything to do with the weather.
+```
+
+### Model & Endpoint Configuration
+Define the AI Model, API endpoint and necessary headers for model interaction.
+```yaml
+url: "https://example.openai.azure.com/openai/deployments/abc123/chat/completions?api-version=2023-11-15"
+headers:
+  Authorization: "Bearer ${{env.OPENAI_API}}"
+  Content-Type: "application/json"
+```
+
+### Parameters
+Specify input parameters, their types, and requirements.
+
+
+
+### Prompt Definition
+Structured content of the prompt, including model information, messages, and optional function calls.
+
+
+### Test Cases
+Define scenarios to test the prompt, ensuring the expected output aligns with various input configurations.

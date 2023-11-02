@@ -45,15 +45,15 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction", "quickstart", "development"]
+      "pages": ["introduction", "structure"]
     },
     {
-      "group": "Essentials",
-      "pages": ["essentials/markdown", "essentials/code", "essentials/images", "essentials/settings", "essentials/navigation"]
+      "group": "Integrations",
+      "pages": ["integrations/cli", "integrations/vscode"]
     },
     {
-      "group": "API Documentation",
-      "pages": ["api-reference/introduction"]
+      "group": "SDKs",
+      "pages": ["sdks/node", "sdks/python", "sdks/ruby"]
     },
     {
       "group": "Endpoint Examples",
