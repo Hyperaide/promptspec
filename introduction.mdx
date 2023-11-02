@@ -1,71 +1,131 @@
 ---
-title: Introduction
-description: 'Welcome to the home of your new documentation'
+title: Overview
+description: 'An introduction to PromptSpec'
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.svg"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.svg"
-  alt="Hero Dark"
-/>
+PromptSpec is an open-source, language-agnostic framework designed to streamline and standardize the process of creating, deploying, and testing AI prompts across various AI models and platforms. It offers a structured approach to building prompts, enabling developers and researchers to create complex AI interactions with ease and consistency.
 
-## Setting up
+### What is PromptSpec?
+PromptSpec is a YAML-based configuration standard that provides a clear, concise, and flexible way to define AI prompts. This specification is designed to be universally adaptable, allowing for seamless integration with different AI models and services. 
 
-The first step to world-class documentation is setting up your editing environnments.
+### Key Features
+- **Structured Prompt Definition**: Clearly define AI prompts with standardized fields for inputs, outputs, and contextual information.
+- **Model Agnostic**: Compatible with various AI models, including but not limited to OpenAI's offerings.
+- **Conditional Logic**: Use expressions to create dynamic prompts that change based on input.
+- **Test Cases**: Embed test cases within your PromptSpec, facilitating automated testing and quality assurance.
+
+### Basic Example
+```yaml
+version: 1.2
+name: "Character AI"
+description: "Responds like the person the user wants the AI to act like."
+
+parameters:
+  type: object
+  properties:
+    character:
+      type: string
+      description: "The character's name"
+  required: ["character"]
+
+prompt:
+  model: "gpt-4"
+  messages:
+    - role: "system"
+      content: "You are {character}. Respond to every message like {character} would."
+```
+
+### Example with Custom Model Endpoint, Input Parameters, Function Calls & Tests
+```yaml
+
+version: 1.0
+name: "Personalized Weather Forecast Query"
+description: |
+  This prompt is designed to provide personalized weather forecasts.
+  It takes into account the user's name and optionally their age.
+  The primary input is the user's location for the weather forecast.
+
+url: "https://example.openai.azure.com/openai/deployments/abc123/chat/completions?api-version=2023-11-15"
+headers:
+  Authorization: "Bearer ${{env.OPENAI_API}}"
+  Content-Type: "application/json"
+
+parameters:
+  type: object
+  properties:
+    name:
+      type: string
+      description: "The user's name"
+    age:
+      type: integer
+      description: "The user's age (optional)"
+  required: ["name"]
+
+prompt:
+  model: "gpt-4"
+  messages:
+    - role: "system"
+      content: |
+        This prompt is designed to provide weather information. 
+        Known user details:
+        - Name: {name}
+        - Age: ${{ parameters.age ? parameters.age : 'Not provided' }}
+
+  functions:
+    - name: "get_weather"
+      description: "Get the current weather in a given location"
+      parameters:
+        type: object
+        properties:
+          location:
+            type: string
+            description: "The city and state, e.g., San Francisco, CA"
+          unit:
+            type: string
+            enum: ["celsius", "fahrenheit"]
+        required: ["location"]
+
+tests:
+  - name: "Test with specific location"
+    parameters:
+      name: "Alice"
+      age: 30
+    additional_messages:
+      - role: "user"
+        content: "What's the temperature in New York today?"
+    response_pattern: ".*\\b\\d{1,2}\\b.*"  # Pattern matching a numeric temperature value
+
+  - name: "Test with vague weather question"
+    parameters:
+      name: "Bob"
+    additional_messages:
+      - role: "user"
+        content: "Do I need an umbrella in Seattle today?"
+    response_pattern: ".*umbrella.*Seattle.*"
+
+  - name: "Test without location, expecting a prompt for location"
+    parameters:
+      name: "Charlie"
+      age: 25
+    additional_messages:
+      - role: "user"
+        content: "What's the weather like today?"
+    response_pattern: ".*location.*"  # Expecting a response that asks for the user's location
+```
 
 <CardGroup cols={2}>
   <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
-  </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
-
-## Make it yours
-
-Update your docs to your brand and add valuable content for the best user conversion.
-
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
+    title="Integrations"
+    icon="box"
+    href="/quickstart"
   >
     Customize your docs to your company's colors and brands
   </Card>
   <Card
-    title="Reference APIs"
+    title="SDKs"
     icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
+    href="/quickstart"
   >
     Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/components/accordion"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/showcase"
-  >
-    Check out our showcase of our favorite documentation
   </Card>
 </CardGroup>
