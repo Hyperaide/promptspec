@@ -17,18 +17,63 @@ Define the AI Model, API endpoint and necessary headers for model interaction.
 ```yaml
 url: "https://example.openai.azure.com/openai/deployments/abc123/chat/completions?api-version=2023-11-15"
 headers:
-  Authorization: "Bearer ${{env.OPENAI_API}}"
+  Authorization: "Bearer ${{env.OPENAI_API_KEY}}"
   Content-Type: "application/json"
 ```
+If no, URL is set, PromptSpec’s SDK will use the prompt’s model string to figure out the URL based on our supported list of models.
+
+You can set this to point to an Azure deployment of OpenAI models or point to a model that PromptSpec SDK does not know about yet. 
 
 ### Parameters
-Specify input parameters, their types, and requirements.
-
-
+Specify input parameters, their types, and requirements. This follows the same structure as the function call’s parameters. 
+``` yaml
+parameters:
+  type: object
+  properties:
+    name:
+      type: string
+      description: "The user's name"
+    age:
+      type: integer
+      description: "The user's age (optional)"
+  required: ["name"]
+```
 
 ### Prompt Definition
-Structured content of the prompt, including model information, messages, and optional function calls.
+Structured content of the prompt, including model information, messages, and optional function calls. This is the same data that would make the payload for the API request to the model’s provider. 
+``` yaml
+prompt:
+  model: "gpt-4"
+  messages:
+    - role: "system"
+      content: "You are {character}. Respond to every message like {character} would."
+    - role: "user"
+      content: "Hey! What's your name?"
+```
+
+
 
 
 ### Test Cases
 Define scenarios to test the prompt, ensuring the expected output aligns with various input configurations.
+
+Tests help run the prompts without having to fill in parameter values each time. You can define a collection of tests which can be recognised by the SDK for testing the prompts. 
+
+``` yaml
+tests:
+  - name: "Test with specific location"
+    parameters:
+      name: "Alice"
+      age: 30
+    additional_messages:
+      - role: "user"
+        content: "What's the temperature in New York today?"
+    assert:
+      type: regex
+      expression: ".*\\b\\d{1,2}\\b.*"  # Pattern matching a numeric temperature value
+```
+
+- Name: Test case’s name for you to easily identity
+- Parameters: Variables that are required to run the prompt and any optional params that the prompt accepts. 
+- Additional Messages: These are added to the list of messages, parsed for parameters & expressions before making request to the AI model. 
+- Assert: Currently PromptSpec SDKs support regular expression assertions of the returned data from the AI’s response. 

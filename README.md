@@ -1,32 +1,129 @@
-# Mintlify Starter Kit
+### What is PromptSpec?
+PromptSpec is a YAML-based configuration standard that provides a clear, concise, and flexible way to define AI prompts. This specification is designed to be universally adaptable, allowing for seamless integration with different AI models and services. 
 
-Click on `Use this template` to copy the Mintlify starter kit. The starter kit contains examples including
+### Key Features
+- **Structured Prompt Definition**: Clearly define AI prompts with standardized fields for inputs, outputs, and contextual information.
+- **Model Agnostic**: Compatible with various AI models, including but not limited to OpenAI's offerings.
+- **Conditional Logic**: Use expressions to create dynamic prompts that change based on input.
+- **Test Cases**: Embed test cases within your PromptSpec, facilitating automated testing and quality assurance.
 
-- Guide pages
-- Navigation
-- Customizations
-- API Reference pages
-- Use of popular components
+### Benefits
+- **Standardization**: PromptSpec offers a uniform method for defining AI prompts, facilitating their creation, sharing, and reuse across various projects and teams.
+- **Flexibility**: With tools like Helicone, you can easily modify the prompt URL in the specification for seamless observability.
+- **Integration with Codebase**: All files reside in your codebase, ensuring they are tracked by git and are easily manageable in code editors. The structured format enhances AI autocomplete functionality, making it more comprehensible for Language Models.
 
-### Development
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the documentation changes locally. To install, use the following command
+### Basic Example
+```yaml character.yaml
+version: 1.2
+name: "Character AI"
+description: "Responds like the person the user wants the AI to act like."
 
+parameters:
+  type: object
+  properties:
+    character:
+      type: string
+      description: "The character's name"
+  required: ["character"]
+
+prompt:
+  model: "gpt-4"
+  messages:
+    - role: "system"
+      content: "You are {character}. Respond to every message like {character} would."
 ```
-npm i -g mintlify
+
+### Example with Custom Model Endpoint, Input Parameters, Function Calls & Tests
+```yaml weather_forecast.yaml
+
+version: 1.0
+name: "Personalized Weather Forecast Query"
+description: |
+  This prompt is designed to provide personalized weather forecasts.
+  It takes into account the user's name and optionally their age.
+  The primary input is the user's location for the weather forecast.
+
+url: "https://example.openai.azure.com/openai/deployments/abc123/chat/completions?api-version=2023-11-15"
+headers:
+  Authorization: "Bearer ${{env.OPENAI_API_KEY}}"
+  Content-Type: "application/json"
+
+parameters:
+  type: object
+  properties:
+    name:
+      type: string
+      description: "The user's name"
+    age:
+      type: integer
+      description: "The user's age (optional)"
+    user_id:
+      type: string
+      description: "Internal ID of the user making this request".
+  required: ["name"]
+
+prompt:
+  model: "gpt-4"
+
+  frequency_penalty: 0
+  stream: true
+  temperature: 0.8
+  top_p: 1
+  user: {user_id}
+
+  messages:
+    - role: "system"
+      content: |
+        This prompt is designed to provide weather information. 
+        Known user details:
+        - Name: {name}
+        - Age: ${{ parameters.age ? parameters.age : 'Not provided' }}
+
+  functions:
+    - name: "get_weather"
+      description: "Get the current weather in a given location"
+      parameters:
+        type: object
+        properties:
+          location:
+            type: string
+            description: "The city and state, e.g., San Francisco, CA"
+          unit:
+            type: string
+            enum: ["celsius", "fahrenheit"]
+        required: ["location"]
+
+tests:
+  - name: "Test with specific location"
+    parameters:
+      name: "Alice"
+      age: 30
+    additional_messages:
+      - role: "user"
+        content: "What's the temperature in New York today?"
+    assert:
+      type: regex
+      expression: ".*\\b\\d{1,2}\\b.*"  # Pattern matching a numeric temperature value
+
+  - name: "Test with vague weather question"
+    parameters:
+      name: "Bob"
+    additional_messages:
+      - role: "user"
+        content: "Do I need an umbrella in Seattle today?"
+    assert:
+      type: regex
+      expression: ".*umbrella.*Seattle.*"
+
+  - name: "Test without location, expecting a prompt for location"
+    parameters:
+      name: "Charlie"
+      age: 25
+    additional_messages:
+      - role: "user"
+        content: "What's the weather like today?"
+    assert:
+      type: regex
+      expression: ".*location.*"  # Expecting a response that asks for the user's location
 ```
-
-Run the following command at the root of your documentation (where mint.json is)
-
-```
-mintlify dev
-```
-
-### Publishing Changes
-
-Install our Github App to autopropagate changes from youre repo to your deployment. Changes will be deployed to production automatically after pushing to the default branch. Find the link to install on your dashboard. 
-
-#### Troubleshooting
-
-- Mintlify dev isn't running - Run `mintlify install` it'll re-install dependencies.
-- Page loads as a 404 - Make sure you are running in a folder with `mint.json`

@@ -3,8 +3,6 @@ title: Overview
 description: 'An introduction to PromptSpec'
 ---
 
-PromptSpec is an open-source, language-agnostic framework designed to streamline and standardize the process of creating, deploying, and testing AI prompts across various AI models and platforms. It offers a structured approach to building prompts, enabling developers and researchers to create complex AI interactions with ease and consistency.
-
 ### What is PromptSpec?
 PromptSpec is a YAML-based configuration standard that provides a clear, concise, and flexible way to define AI prompts. This specification is designed to be universally adaptable, allowing for seamless integration with different AI models and services. 
 
@@ -14,8 +12,14 @@ PromptSpec is a YAML-based configuration standard that provides a clear, concise
 - **Conditional Logic**: Use expressions to create dynamic prompts that change based on input.
 - **Test Cases**: Embed test cases within your PromptSpec, facilitating automated testing and quality assurance.
 
+### Benefits
+- **Standardization**: PromptSpec offers a uniform method for defining AI prompts, facilitating their creation, sharing, and reuse across various projects and teams.
+- **Flexibility**: With tools like Helicone, you can easily modify the prompt URL in the specification for seamless observability.
+- **Integration with Codebase**: All files reside in your codebase, ensuring they are tracked by git and are easily manageable in code editors. The structured format enhances AI autocomplete functionality, making it more comprehensible for Language Models.
+
+
 ### Basic Example
-```yaml character_ai.yaml
+```yaml character.yaml
 version: 1.2
 name: "Character AI"
 description: "Responds like the person the user wants the AI to act like."
@@ -47,7 +51,7 @@ description: |
 
 url: "https://example.openai.azure.com/openai/deployments/abc123/chat/completions?api-version=2023-11-15"
 headers:
-  Authorization: "Bearer ${{env.OPENAI_API}}"
+  Authorization: "Bearer ${{env.OPENAI_API_KEY}}"
   Content-Type: "application/json"
 
 parameters:
@@ -59,10 +63,20 @@ parameters:
     age:
       type: integer
       description: "The user's age (optional)"
+    user_id:
+      type: string
+      description: "Internal ID of the user making this request".
   required: ["name"]
 
 prompt:
   model: "gpt-4"
+
+  frequency_penalty: 0
+  stream: true
+  temperature: 0.8
+  top_p: 1
+  user: {user_id}
+
   messages:
     - role: "system"
       content: |
@@ -93,7 +107,9 @@ tests:
     additional_messages:
       - role: "user"
         content: "What's the temperature in New York today?"
-    response_pattern: ".*\\b\\d{1,2}\\b.*"  # Pattern matching a numeric temperature value
+    assert:
+      type: regex
+      expression: ".*\\b\\d{1,2}\\b.*"  # Pattern matching a numeric temperature value
 
   - name: "Test with vague weather question"
     parameters:
@@ -101,7 +117,9 @@ tests:
     additional_messages:
       - role: "user"
         content: "Do I need an umbrella in Seattle today?"
-    response_pattern: ".*umbrella.*Seattle.*"
+    assert:
+      type: regex
+      expression: ".*umbrella.*Seattle.*"
 
   - name: "Test without location, expecting a prompt for location"
     parameters:
@@ -110,7 +128,9 @@ tests:
     additional_messages:
       - role: "user"
         content: "What's the weather like today?"
-    response_pattern: ".*location.*"  # Expecting a response that asks for the user's location
+    assert:
+      type: regex
+      expression: ".*location.*"  # Expecting a response that asks for the user's location
 ```
 
 <CardGroup cols={2}>
