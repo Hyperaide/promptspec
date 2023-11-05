@@ -32,15 +32,11 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction", "structure"]
+      "pages": ["introduction", "structure", "sdks"]
     },
     {
       "group": "Integrations",
       "pages": ["integrations/cli", "integrations/vscode"]
-    },
-    {
-      "group": "SDKs",
-      "pages": ["sdks/node", "sdks/python", "sdks/ruby"]
     }
   ],
   "footerSocials": {
